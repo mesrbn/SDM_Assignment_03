@@ -32,14 +32,14 @@ public class SQLVarchar extends SQLVarcharBase {
 	@Override
 	public byte[] serialize() {
 		//TODO: Insert your own implementation from exercise02
-
-		return null;
+		return this.data != null ? this.data : this.value.getBytes();
 	}
 
 	@Override
 	public void deserialize(byte[] data) {
 		//TODO: Insert your own implementation from exercise02
-
+		this.value = new String(data);
+		this.data = (byte[])data.clone();
 	}
 	
 	@Override

@@ -29,12 +29,24 @@ public class SQLInteger extends SQLIntegerBase {
 	@Override
 	public byte[] serialize() {
 		//TODO: Insert your own implementation from exercise02
-		return null;
+		byte[] bytes = new byte[4];
+
+		for(int i = 0; i < 4; ++i) {
+			bytes[i] = (byte)(this.value >>> i * 8);
+		}
+
+		return bytes;
 	}
 
 	@Override
 	public void deserialize(byte[] data) {
 		//TODO: Insert your own implementation from exercise02
+		int length = data.length;
+		if (data.length > 4) {
+			System.out.println("WARN: Passed data array is to long, will only take the first 4 bytes!");
+			length = 4;
+
+		}
 	}
 	
 	

@@ -19,13 +19,24 @@ public class HeapTable extends HeapTableBase {
 	@Override
 	public RecordIdentifier insert(AbstractRecord record) {
 		//TODO: Insert your own implementation from exercise02
-		return null;
+		if (!this.lastPage.recordFitsIntoPage(record)) {
+			this.lastPage = PageManager.createDefaultPage(this.prototype.getFixedLength());
+			this.addPage(this.lastPage);
+		}
+
+		int slotNumber = this.lastPage.insert(record);
+		++this.recordCount;
+		RecordIdentifier recordID = new RecordIdentifier(this.lastPage.getPageNumber(), slotNumber);
+		this.recordIDMapping.add(recordID);
+		return recordID;
 	}
 
 	@Override
 	public AbstractRecord lookup(int pageNumber, int slotNumber) {
 		//TODO: Insert your own implementation from exercise02
-		return null;
+		AbstractRecord record = this.prototype.clone();
+		this.getPage(pageNumber).read(slotNumber, record);
+		return record;
 	}
 
 }

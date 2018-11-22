@@ -29,6 +29,21 @@ public class Leaf<T extends AbstractSQLValue> extends LeafBase<T>{
 	@Override
 	public AbstractRecord lookup(T key) {
 		//TODO: implement this method
+		int slotNumber = this.binarySearch(key);
+		AbstractRecord leafRecord = this.uniqueBPlusTree.getLeafRecPrototype().clone();
+		if (slotNumber < this.indexPage.getNumRecords()) {
+			this.indexPage.read(slotNumber, leafRecord);
+			SQLInteger tablePage = (SQLInteger)leafRecord.getValue(1);
+			SQLInteger tableSlot = (SQLInteger)leafRecord.getValue(2);
+			AbstractRecord retrieved = this.uniqueBPlusTree.getTable().lookup(tablePage.getValue(), tableSlot.getValue());
+			if (slotNumber != 0) {
+				return retrieved;
+			}
+
+			if (key.equals(retrieved.getValue(this.uniqueBPlusTree.getKeyColumnNumber()))) {
+				return retrieved;
+			}
+		}
 
 		return null;
 	}
@@ -42,7 +57,23 @@ public class Leaf<T extends AbstractSQLValue> extends LeafBase<T>{
 	public boolean insert(T key, AbstractRecord record){
 		//TODO: implement this method
 		//search for key and return false if existing
+		int slotNumber = 0;
+		AbstractRecord leafRecord = this.uniqueBPlusTree.getLeafRecPrototype().clone();
+		if (this.indexPage.getNumRecords() > 0) {
+			slotNumber = this.binarySearch(key);
+			if (slotNumber < this.indexPage.getNumRecords()) {
+				this.indexPage.read(slotNumber, leafRecord);
+				if (leafRecord.getValue(this.uniqueBPlusTree.getKeyColumnNumber()).compareTo(key) == 0) {
+					return false;
+				}
+			}
+		}
 
+		RecordIdentifier rid = this.uniqueBPlusTree.getTable().insert(record);
+		leafRecord.setValue(0, key);
+		leafRecord.setValue(1, new SQLInteger(rid.getPageNumber()));
+		leafRecord.setValue(2, new SQLInteger(rid.getSlotNumber()));
+		this.indexPage.insert(slotNumber, leafRecord, true);
 		return true;
 	}
 	
